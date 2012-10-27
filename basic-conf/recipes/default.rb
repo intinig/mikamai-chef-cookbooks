@@ -88,12 +88,14 @@ end
 github_creds = Chef::EncryptedDataBagItem.load("passwords", "github")
 github_command_string = "github-key-upload -k /var/apps/.ssh/id_dsa.pub -u #{github_creds["user"]} -P #{github_creds["password"]} -t #{node.ec2.instance_id}"
 
-execute github_command_string + " -C" do
-  notifies :run, "execute[#{github_command_string}]", :immediately
-  returns 1
-  ignore_failure true
+execute github_command_string do
+  not_if github_command_string + " -C"
 end
 
-execute github_command_string do
-  action :nothing
-end
+# directory "/var/chef/handlers" do
+#   recursive true
+# end
+
+# execute "shutdown -r +1" do
+#   only_if "test -f /var/run/reboot-required"
+# end
