@@ -8,6 +8,7 @@
 #
 
 include_recipe "apt"
+include_recipe "reboot-handler"
 
 execute "dpkg-reconfigure grub-pc" do
   environment "DEBIAN_FRONTEND"  => "noninteractive"
@@ -92,10 +93,10 @@ execute github_command_string do
   not_if github_command_string + " -C"
 end
 
-# directory "/var/chef/handlers" do
-#   recursive true
-# end
-
-# execute "shutdown -r +1" do
-#   only_if "test -f /var/run/reboot-required"
-# end
+ruby_block "check_restart" do
+  block do
+    node.run_state['reboot'] = true
+    node.save
+  end
+  only_if "test -f /var/run/reboot-required"
+end

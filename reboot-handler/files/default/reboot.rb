@@ -6,7 +6,8 @@ class Reboot < Chef::Handler
     ### If Chef ran successfully.
     if run_status.success?
       ### AND node is in the booted role.
-        if node.roles.include? node['reboot-handler']['enabled_role']
+        ### bypassing it for test reasons
+        if node.roles.include?(node['reboot-handler']['enabled_role']) || true
           ### AND node has the reboot flag.
           if node.run_state['reboot']
             ### THEN reboot node.
