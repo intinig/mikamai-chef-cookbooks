@@ -1,0 +1,33 @@
+#!/usr/bin/python
+import os
+
+from datetime import date
+
+pem_file = '/mnt/pk-I7IU5NIF7DQEN7SKFB74RMKHVOW5YGZH.pem'
+cert_file = '/mnt/cert-I7IU5NIF7DQEN7SKFB74RMKHVOW5YGZH.pem'
+user_id = '413858200151'
+platform = 'i386'
+bucket = 'mikamai-<%= @node["ec2"]["instance_id"] %>'
+location = '<%= @node["ec2"]["placement_availability_zone"].split("-").first.upcase %>'
+
+access_key = '11HENRY2898F52ZT2QR2'
+secret_key = '0UuvYlpN7sn8nerYfyIMsm2oT2h3WJMy7cKTIq7s'
+ec2_path = '/usr/bin/' #use trailing slash
+
+# DO NOT EDIT BELOW THIS
+
+days = ('sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')
+manifest = days[date.today().weekday()]
+
+step_1 = 'rm -f /mnt/%s*' % (manifest,)
+step_2 = '%sec2-bundle-vol -p %s -d /mnt -k %s -c %s -u %s -r %s' % (ec2_path, manifest, pem_file, cert_file, user_id, platform)
+step_3 = '%sec2-upload-bundle -b %s -m /mnt/%s.manifest.xml -a %s -s %s --location %s' % (ec2_path, bucket, manifest, access_key, secret_key, location)
+step_4 = 'rm -f /mnt/%s*' % (manifest,)
+print step_1
+os.system(step_1)
+print step_2
+os.system(step_2)
+print step_3
+os.system(step_3)
+print step_4
+os.system(step_4)

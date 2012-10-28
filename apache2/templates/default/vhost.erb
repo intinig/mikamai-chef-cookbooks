@@ -1,0 +1,36 @@
+<VirtualHost *:80>
+        ServerName <%= @n["domain"] %>
+        ServerAdmin giovanni@mikamai.com
+
+        DocumentRoot <%= @docroot %>
+
+        <Directory />
+                Options FollowSymLinks
+                AllowOverride None
+        </Directory>
+        <Directory <%= @docroot %>>
+                Options Indexes FollowSymLinks <%- if @n["rails"] %> -MultiViews <%- end %>
+                AllowOverride All
+                Order allow,deny
+                allow from all
+        </Directory>
+
+        ErrorLog /var/log/apache2/<%= @n["domain"] %>.error.log
+
+        # Possible values include: debug, info, notice, warn, error, crit,
+        # alert, emerg.
+        LogLevel warn
+
+        CustomLog /var/log/apache2/<%= @n["domain"] %>.access.log combined
+
+</VirtualHost>
+<%- if @n['www-redirection'] %>
+<VirtualHost *:80>
+  ServerName <%= @appname %>
+  ServerAdmin giovanni@mikamai.com
+
+  RewriteEngine On
+  RewriteCond %{HTTP_HOST} ^<%= @appname.gsub(".", "\.") %>
+  RewriteRule (.*) http://<%= @n["domain"] %>$1 [R=301,L]
+</VirtualHost>
+<%- end %>
