@@ -7,6 +7,7 @@
 # All rights reserved - Do Not Redistribute
 #
 
+include_recipe "ubuntu"
 include_recipe "apt"
 include_recipe "reboot-handler"
 
