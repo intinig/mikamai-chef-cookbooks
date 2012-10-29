@@ -12,3 +12,7 @@ include_recipe "apache2"
 package "php5" do
   action :install
 end
+
+package "php-pear" do
+  action :install
+end
