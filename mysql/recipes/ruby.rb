@@ -1,8 +1,11 @@
 #
 # Cookbook Name:: mysql
-# Recipe:: default
+# Recipe:: ruby
 #
-# Copyright 2008-2009, Opscode, Inc.
+# Author:: Jesse Howarth (<him@jessehowarth.com>)
+# Author:: Jamie Winsor (<jamie@vialstudios.com>)
+#
+# Copyright 2008-2012, Opscode, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,4 +20,17 @@
 # limitations under the License.
 #
 
+execute "apt-get update" do
+  ignore_failure true
+  action :nothing
+end.run_action(:run) if node['platform_family'] == "debian"
+
+node.set['build_essential']['compiletime'] = true
+include_recipe "build-essential"
 include_recipe "mysql::client"
+
+node['mysql']['client']['packages'].each do |mysql_pack|
+  resources("package[#{mysql_pack}]").run_action(:install)
+end
+
+chef_gem "mysql"
