@@ -7,6 +7,7 @@ version           "1.1.0"
 depends "build-essential"
 depends "xml"
 depends "mysql"
+depends "apache2"
 
 %w{ debian ubuntu centos redhat fedora scientific amazon }.each do |os|
   supports os
@@ -23,5 +24,6 @@ recipe "php::module_gd", "Install the php5-gd package"
 recipe "php::module_ldap", "Install the php5-ldap package"
 recipe "php::module_memcache", "Install the php5-memcache package"
 recipe "php::module_mysql", "Install the php5-mysql package"
-recipe "php::module_pgsql", "Install the php5-pgsql packag"
+recipe "php::module_pgsql", "Install the php5-pgsql package"
 recipe "php::module_sqlite3", "Install the php5-sqlite3 package"
+recipe "php::module_ioncube", "Install the ioncube package"

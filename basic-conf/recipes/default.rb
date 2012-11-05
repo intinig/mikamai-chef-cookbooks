@@ -10,6 +10,8 @@
 include_recipe "ubuntu"
 include_recipe "apt"
 include_recipe "reboot-handler"
+include_recipe "build-essential"
+include_recipe "xml"
 
 # warning: not idempotent, but not one dies if you run it more than once
 # we should drop this for future versions of ubuntu
@@ -73,6 +75,19 @@ directory "/var/apps/.ssh" do
   mode 0740
 end
 
+directory "/var/apps/log" do
+  action :create
+  owner "deploy"
+  group "deploy"
+  mode 0770
+end
+
+group "deploy" do
+  action :modify
+  members "www-data"
+  append true
+end
+
 cookbook_file "/var/apps/.ssh/authorized_keys" do
   action :create
   owner "deploy"
@@ -91,18 +106,6 @@ end
 execute 'ssh-keygen -t dsa -f /var/apps/.ssh/id_dsa -N ""' do
   user "deploy"
   creates "/var/apps/.ssh/id_dsa"
-end
-
-package "build-essential" do
-  action :install
-end
-
-package "libxslt-dev" do
-  action :install
-end
-
-package "libxml2-dev" do
-  action :install
 end
 
 package "git-core" do

@@ -30,8 +30,9 @@ when "rhel", "fedora"
   default['php']['fpm_user']      = 'nobody'
   default['php']['fpm_group']     = 'nobody'
   default['php']['ext_dir']       = "/usr/#{lib_dir}/php/modules"
-when "debian"
-  default['php']['conf_dir']      = '/etc/php5/cli'
+when "debian", "ubuntu"
+  # WARNING: THIS CONF DIR BREAKS CLI PHP BUT WE DON'T CARE
+  default['php']['conf_dir']      = '/etc/php5/apache2'
   default['php']['ext_conf_dir']  = '/etc/php5/conf.d'
   default['php']['fpm_user']      = 'www-data'
   default['php']['fpm_group']     = 'www-data'
