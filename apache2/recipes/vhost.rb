@@ -23,6 +23,6 @@ node.apache2.vhosts.each do |h|
 
   link "/etc/apache2/sites-enabled/#{h["domain"]}" do
     to "/etc/apache2/sites-available/#{h["domain"]}"
-    notifies :reload, "service[apache2]"
+    notifies :restart, "service[apache2]"
   end
 end
