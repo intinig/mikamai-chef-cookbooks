@@ -119,7 +119,7 @@ end
 
 
 github_creds = Chef::EncryptedDataBagItem.load("passwords", "github")
-github_command_string = "github-key-upload -k /var/apps/.ssh/id_dsa.pub -u #{github_creds["user"]} -P #{github_creds["password"]} -t #{node.ec2.instance_id}"
+github_command_string = "github-key-upload -k /var/apps/.ssh/id_dsa.pub -u #{github_creds["user"]} -P #{github_creds["password"]} -t #{Chef::Config[:node_name]}"
 
 execute github_command_string do
   not_if github_command_string + " -C"

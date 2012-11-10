@@ -13,12 +13,21 @@ link "/etc/apache2/mods-enabled/rewrite.load" do
 end
 
 node.apache2.vhosts.each do |h|
+  appname = (h["domain"] =~ /^www./) ? h["domain"].split(".")[1..-1].join(".") : h["domain"]
+  docroot = "/var/apps/#{appname}/current"
+  docroot += "/public" if h["rails"]
+
   template "/etc/apache2/sites-available/#{h["domain"]}" do
     source "vhost.erb"
-    appname = (h["domain"] =~ /^www./) ? h["domain"].split(".")[1..-1].join(".") : h["domain"]
-    docroot = "/var/apps/#{appname}/current"
-    docroot += "/public" if h["rails"]
     variables :n => h, :docroot => docroot, :appname => appname
+  end
+
+  logrotate_app appname do
+    cookbook "logrotate"
+    path "/var/apps/#{h["domain"]}*.log"
+    frequency "weekly"
+    rotate 52
+    create "644 root adm"
   end
 
   link "/etc/apache2/sites-enabled/#{h["domain"]}" do

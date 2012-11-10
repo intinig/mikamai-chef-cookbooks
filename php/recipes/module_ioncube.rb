@@ -28,7 +28,12 @@ execute "tar xfz ioncube_loaders_lin_x86.tar.gz" do
   not_if "test -f /etc/php5/apache2/conf.d/20ioncube.ini"
 end
 
-execute "mv ioncube/* /usr/lib/php5/20090626+lfs/" do
+directory "/usr/lib/php5/ioncube" do
+  action :create
+end
+
+execute "put ioncube in the right place" do
+  command "mv ioncube/* /usr/lib/php5/ioncube"
   cwd "/tmp"
   not_if "test -f /etc/php5/apache2/conf.d/20ioncube.ini"
 end
