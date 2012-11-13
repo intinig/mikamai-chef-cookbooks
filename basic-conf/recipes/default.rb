@@ -10,8 +10,11 @@
 include_recipe "ubuntu"
 include_recipe "apt"
 include_recipe "reboot-handler"
-include_recipe "build-essential"
 include_recipe "xml"
+
+node.set['build_essential']['compiletime'] = true
+node.save
+include_recipe "build-essential"
 
 # warning: not idempotent, but not one dies if you run it more than once
 # we should drop this for future versions of ubuntu

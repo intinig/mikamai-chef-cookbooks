@@ -26,6 +26,8 @@ execute "apt-get update" do
 end.run_action(:run) if node['platform_family'] == "debian"
 
 node.set['build_essential']['compiletime'] = true
+node.save
+
 include_recipe "build-essential"
 include_recipe "mysql::client"
 
