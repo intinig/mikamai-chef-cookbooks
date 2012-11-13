@@ -17,6 +17,10 @@
 # limitations under the License.
 #
 
+def platform?(platforms)
+  platforms.include? node["platform"]
+end
+
 default['mysql']['bind_address']               = attribute?('cloud') ? cloud['local_ipv4'] : ipaddress
 default['mysql']['port']                       = 3306
 

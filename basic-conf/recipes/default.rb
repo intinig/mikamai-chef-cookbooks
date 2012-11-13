@@ -117,6 +117,11 @@ gem_package "github-key-upload" do
   options("--no-ri --no-rdoc")
 end
 
+gem_package "right_aws" do
+  action :install
+  options("--no-ri --no-rdoc")
+  only_if { node["ec2"] }
+end
 
 github_creds = Chef::EncryptedDataBagItem.load("passwords", "github")
 github_command_string = "github-key-upload -k /var/apps/.ssh/id_dsa.pub -u #{github_creds["user"]} -P #{github_creds["password"]} -t #{Chef::Config[:node_name]}"
