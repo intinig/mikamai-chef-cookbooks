@@ -17,13 +17,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+arch = (node.kernel.machine == "x86_64") ? "-64" : ""
 
-execute "wget http://downloads2.ioncube.com/loader_downloads/ioncube_loaders_lin_x86.tar.gz" do
+execute "download ioncube" do
+  command "wget http://downloads2.ioncube.com/loader_downloads/ioncube_loaders_lin_x86#{arch}.tar.gz"
   cwd "/tmp"
   not_if "test -f /etc/php5/apache2/conf.d/20ioncube.ini"
 end
 
-execute "tar xfz ioncube_loaders_lin_x86.tar.gz" do
+execute "tar xfz ioncube_loaders_lin_x86#{arch}.tar.gz" do
   cwd "/tmp"
   not_if "test -f /etc/php5/apache2/conf.d/20ioncube.ini"
 end
