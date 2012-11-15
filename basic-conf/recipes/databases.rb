@@ -1,6 +1,6 @@
 #
-# Cookbook Name:: mysql
-# Recipe:: databases
+# Cookbook Name:: basic-conf
+# Recipe:: dbc
 #
 # Copyright 2012, MIKAMAI
 #
