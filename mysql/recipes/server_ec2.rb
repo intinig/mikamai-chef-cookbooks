@@ -17,8 +17,6 @@
 # limitations under the License.
 #
 
-include_recipe "mysql::server"
-
 if (node.attribute?('ec2') && ! FileTest.directory?(node['mysql']['ec2_path']))
 
   service "mysql" do
