@@ -50,13 +50,25 @@ end
 
 %w{main master}.each do |cfg|
 
+  if Chef::Config[:solo]
+    Chef::Log.warn("This recipe uses search. Chef Solo does not support search.")
+  else
+    if node['postfix']['mail_relay_query']
+      mail_relay_query = search(:node, mail_relay_query).map do |n|
+        n["cloud"] ? n["cloud"]["public_ipv4"] : n["ipaddress"]
+      end.join(",")
+    else
+      mail_relay_networks = node['postfix']['mail_relay_networks']
+    end
+  end
+
   template "/etc/postfix/#{cfg}.cf" do
     source "#{cfg}.cf.erb"
     owner "root"
     group 0
     mode 00644
     notifies :restart, "service[postfix]"
-
+    variables({:mail_relay_networks => mail_relay_networks})
   end
 end
 

@@ -30,7 +30,7 @@ alias_database = hash:/etc/aliases
 mydestination = <%= node['postfix']['myhostname'] %>, <%= node['hostname'] %>, localhost.localdomain, localhost
 <% if node['postfix']['mail_type'] == "master" -%>
 relayhost =
-mynetworks = <%= node['postfix']['mail_relay_networks'] %>
+mynetworks = <%= @mail_relay_networks %>
 inet_interfaces = all
 <% else -%>
 relayhost = <%= node['postfix']['relayhost'] %>
