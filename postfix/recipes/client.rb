@@ -28,13 +28,13 @@ relayhost = ""
 results = []
 
 if node.run_list.roles.include?(node['postfix']['relayhost_role'])
-  relayhost << node['ipaddress']
+  relayhost << (node["cloud"] ? node["cloud"]["public_ipv4"] : node['ipaddress'])
 elsif node['postfix']['multi_environment_relay']
   results = search(:node, query)
-  relayhost = results.map {|n| n['ipaddress']}.first
+  relayhost = results.map {|n| n["cloud"] ? n["cloud"]["public_ipv4"] : n['ipaddress']}.first
 else
   results = search(:node, "#{query} AND chef_environment:#{node.chef_environment}")
-  relayhost = results.map {|n| n['ipaddress']}.first
+  relayhost = results.map {|n| n["cloud"] ? n["cloud"]["public_ipv4"] : n['ipaddress']}.first
 end
 
 node.set['postfix']['relayhost'] = "[#{relayhost}]"

@@ -52,9 +52,11 @@ end
 
   if Chef::Config[:solo]
     Chef::Log.warn("This recipe uses search. Chef Solo does not support search.")
+    return
   else
     if node['postfix']['mail_relay_query']
-      mail_relay_query = search(:node, mail_relay_query).map do |n|
+      query = "#{node['postfix']['mail_relay_query']} AND chef_environment:#{node.chef_environment}"
+      mail_relay_networks = search(:node, query).map do |n|
         n["cloud"] ? n["cloud"]["public_ipv4"] : n["ipaddress"]
       end.join(",")
     else
