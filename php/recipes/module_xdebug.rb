@@ -22,9 +22,18 @@
 package "php5-xdebug" do
   action :install
   notifies :restart, "service[apache2]"
+  only_if {node['php']['xdebug']}
+end
+
+package "php-xdebug removal" do
+  package_name "php5-xdebug"
+  action :remove
+  notifies :restart, "service[apache2]"
+  not_if {node['php']['xdebug']}
 end
 
 template "/etc/php5/apache2/conf.d/xdebug.additional.ini" do
   action :create
   notifies :restart, "service[apache2]"
+  variables({:ip => (node["cloud"] ? node["cloud"]["public_ipv4"] : node["ipaddress"])})
 end

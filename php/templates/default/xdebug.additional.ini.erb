@@ -1,2 +1,6 @@
+xdebug.cli_color = 1
+xdebug.show_exception_trace = 1
+
 xdebug.remote_enable = 1
-xdebug.remote_host = <%= @node[:ip] || @node[:ec2][:public_ipv4] %>
+xdebug.remote_host = <%= @ip %>
+xdebug.remote_port = 8888

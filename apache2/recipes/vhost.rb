@@ -9,7 +9,7 @@
 
 link "/etc/apache2/mods-enabled/rewrite.load" do
   to "/etc/apache2/mods-available/rewrite.load"
-  notifies :reload, "service[apache2]"
+  notifies :restart, "service[apache2]"
 end
 
 node.apache2.vhosts.each do |h|
@@ -33,5 +33,15 @@ node.apache2.vhosts.each do |h|
   link "/etc/apache2/sites-enabled/#{h["domain"]}" do
     to "/etc/apache2/sites-available/#{h["domain"]}"
     notifies :restart, "service[apache2]"
+    only_if {h["enabled"]}
+  end
+
+  link "/etc/apache2/sites-enabled/#{h["domain"]} remove" do
+    target_file "/etc/apache2/sites-enabled/#{h["domain"]}"
+    to "/etc/apache2/sites-available/#{h["domain"]}"
+    notifies :restart, "service[apache2]"
+    not_if {h["enabled"]}
+    only_if "test -f /etc/apache2/sites-enabled/#{h["domain"]}"
+    action :delete
   end
 end

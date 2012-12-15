@@ -23,6 +23,8 @@ lib_dir = kernel['machine'] =~ /x86_64/ ? 'lib64' : 'lib'
 default['php']['install_method'] = 'package'
 default['php']['directives'] = {}
 
+default['php']['xdebug'] = false
+
 case node["platform_family"]
 when "rhel", "fedora"
   default['php']['conf_dir']      = '/etc'

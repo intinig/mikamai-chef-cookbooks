@@ -32,6 +32,8 @@ default['postfix']['smtp_tls_cafile'] = "/etc/postfix/cacert.pem"
 default['postfix']['smtp_use_tls']    = "yes"
 default['postfix']['smtp_sasl_user_name'] = ""
 default['postfix']['smtp_sasl_passwd']    = ""
+default['postfix']['smtp_tls_security_level'] = "encrypt"
+default['postfix']['smtp_tls_note_starttls_offer'] = "yes"
 
 default['postfix']['use_procmail'] = false
 
