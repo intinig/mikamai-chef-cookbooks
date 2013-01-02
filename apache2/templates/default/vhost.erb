@@ -17,6 +17,10 @@
 
         ErrorLog /var/apps/log/<%= @n["domain"] %>.error.log
 
+        <%- @n["redirects"].each do |red| -%>
+        <%= "RedirectPermanent \"#{red.first}\" \"#{red.last}\"" %>
+        <%- end -%>
+
         # Possible values include: debug, info, notice, warn, error, crit,
         # alert, emerg.
         LogLevel warn
