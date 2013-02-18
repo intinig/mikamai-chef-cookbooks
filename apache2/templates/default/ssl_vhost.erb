@@ -1,0 +1,57 @@
+# questa parte e' tutta sbagliata non funziona se hai piu' vhost ssl
+# completamente da fixare
+
+<VirtualHost <%= @ipaddress %>:443>
+        ServerAdmin giovanni@mikamai.com
+        ServerName <%= @n["domain"] %>:443
+        DocumentRoot <%= @docroot %>
+
+        <Directory />
+                Options FollowSymLinks
+                AllowOverride None
+        </Directory>
+
+        <Directory <%= @docroot %>>
+                Options Indexes FollowSymLinks <%- if @n["rails"] %> -MultiViews <%- end %>
+                AllowOverride All
+                Order allow,deny
+                allow from all
+        </Directory>
+
+        ErrorLog /var/apps/log/<%= @n["domain"] %>.ssl.error.log
+
+        LogLevel warn
+
+        CustomLog /var/apps/log/<%= @n["domain"] %>.ssl.access.log combined
+
+        SSLEngine on
+
+        SSLCertificateFile    <%= @node['ssl']['certs_dir'] %>/<%= @appname %>.crt
+        SSLCertificateKeyFile <%= @node['ssl']['keys_dir'] %>/<%= @appname %>.key
+        SSLCACertificateFile <%= @node['ssl']['certs_dir'] %>/<%= @appname %>.chain.crt
+
+        BrowserMatch ".*MSIE.*" \
+                nokeepalive ssl-unclean-shutdown \
+                downgrade-1.0 force-response-1.0
+</VirtualHost>
+
+<%- if @n['www-redirection'] %>
+<VirtualHost <%= @ipaddress %>:443>
+  ServerName <%= @appname %>:443
+  ServerAdmin giovanni@mikamai.com
+
+  RewriteEngine On
+  RewriteCond %{HTTP_HOST} ^<%= @appname.gsub(".", "\.") %>
+  RewriteRule (.*) https://<%= @n["domain"] %>$1 [R=301,L]
+
+  SSLEngine on
+
+  SSLCertificateFile    <%= @node['ssl']['certs_dir'] %>/<%= @appname %>.crt
+  SSLCertificateKeyFile <%= @node['ssl']['keys_dir'] %>/<%= @appname %>.key
+  SSLCACertificateFile <%= @node['ssl']['certs_dir'] %>/<%= @appname %>.chain.crt
+
+  BrowserMatch ".*MSIE.*" \
+      nokeepalive ssl-unclean-shutdown \
+      downgrade-1.0 force-response-1.0
+</VirtualHost>
+<%- end %>
