@@ -24,7 +24,9 @@ end
 
 # warning: not idempotent but ideally we want to run on the latest versions of
 # everything
-execute "apt-get upgrade -y"
+execute "apt-get upgrade -y" do
+  environment "DEBIAN_FRONTEND"  => "noninteractive"
+end
 
 %w(intinig).each do |u|
   user u do

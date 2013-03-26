@@ -1,0 +1,10 @@
+PassengerRoot <%= node[:passenger][:root_path] %>
+<%- if node[:rvm] -%>
+PassengerRuby <%= node[:rvm][:ruby][:ruby_bin] %>
+<%- else -%>
+PassengerRuby <%= node[:languages][:ruby][:ruby_bin] %>
+<%- end -%>
+
+<% node[:passenger][:conf].each do |setting, value| -%>
+<%= "Passenger"+setting.gsub(/(^|_|\s+)([a-z])/){$2.upcase} %> <%= value %>
+<% end -%>

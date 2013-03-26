@@ -1,0 +1,18 @@
+<VirtualHost <%= @ipaddress %>:443>
+  ServerName <%= @n["domain"] %>:443
+  ServerAdmin giovanni@mikamai.com
+
+  RewriteEngine On
+  RewriteCond %{HTTP_HOST} ^<%= @n["domain"].gsub(".", "\.") %>
+  RewriteRule (.*) https://<%= @n["target"] %>$1 [R=301,L]
+
+  SSLEngine on
+
+  SSLCertificateFile    <%= @node['ssl']['certs_dir'] %>/<%= @n["domain"] %>.crt
+  SSLCertificateKeyFile <%= @node['ssl']['keys_dir'] %>/<%= @n["domain"] %>.key
+  SSLCACertificateFile <%= @node['ssl']['certs_dir'] %>/<%= @n["domain"] %>.chain.crt
+
+  BrowserMatch ".*MSIE.*" \
+      nokeepalive ssl-unclean-shutdown \
+      downgrade-1.0 force-response-1.0
+</VirtualHost>

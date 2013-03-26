@@ -12,6 +12,13 @@ link "/etc/apache2/mods-enabled/rewrite.load" do
   notifies :restart, "service[apache2]"
 end
 
+node.apache2.redirects.each do |h|
+  template "/etc/apache2/sites-available/#{h["domain"]}" do
+    source "redirect.erb"
+    variables :n => h
+  end
+end
+
 node.apache2.vhosts.each do |h|
   appname = (h["domain"] =~ /^www./) ? h["domain"].split(".")[1..-1].join(".") : h["domain"]
   docroot = "/var/apps/#{appname}/current"
@@ -21,8 +28,10 @@ node.apache2.vhosts.each do |h|
     source "vhost.erb"
     variables :n => h, :docroot => docroot, :appname => appname
   end
+end
 
-  logrotate_app appname do
+(node.apache2.redirects + node.apache2.vhosts).each do |h|
+  logrotate_app h["domain"] do
     cookbook "logrotate"
     path "/var/apps/#{h["domain"]}*.log"
     frequency "weekly"

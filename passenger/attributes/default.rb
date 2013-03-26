@@ -1,3 +1,6 @@
-default[:passenger][:version]     = "3.0.18"
-default[:passenger][:root_path]   = "#{languages[:ruby][:gems_dir]}/gems/passenger-#{passenger[:version]}"
-default[:passenger][:module_path] = "#{passenger[:root_path]}/ext/apache2/mod_passenger.so"
+default[:passenger][:conf][:max_pool_size] = 10
+default[:passenger][:conf][:max_requests] = 1000
+#default[:passenger][:conf][:min_instances] = 
+default[:passenger][:conf][:max_instances_per_app] = 0
+#default[:passenger][:conf][:pool_idle_time]
+default[:passenger][:conf][:user_switching] = "off"

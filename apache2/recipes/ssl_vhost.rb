@@ -17,6 +17,15 @@ link "/etc/apache2/sites-enabled/default-ssl" do
   notifies :restart, "service[apache2]"
 end
 
+node.apache2.ssl_redirects.each do |h|
+  ipaddress = (node["cloud"] ? node["cloud"]["public_ipv4"] : node['ipaddress'])
+
+  template "/etc/apache2/sites-available/#{h["domain"]}_ssl" do
+    source "ssl_redirect.erb"
+    variables :ipaddress => ipaddress, :n => h
+  end
+end
+
 node.apache2.ssl_vhosts.each do |h|
   appname = (h["domain"] =~ /^www./) ? h["domain"].split(".")[1..-1].join(".") : h["domain"]
   docroot = "/var/apps/#{appname}/current"
@@ -28,8 +37,10 @@ node.apache2.ssl_vhosts.each do |h|
     source "ssl_vhost.erb"
     variables :ipaddress => ipaddress, :n => h, :docroot => docroot, :appname => appname
   end
+end
 
-  logrotate_app appname do
+(node.apache2.ssl_redirects + node.apache2.ssl_vhosts).each do |h|
+  logrotate_app h["domain"] do
     cookbook "logrotate"
     path "/var/apps/#{h["domain"]}*ssl*.log"
     frequency "weekly"

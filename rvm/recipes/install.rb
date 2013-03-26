@@ -19,6 +19,7 @@ end
 bash "make #{ruby_version} the default ruby" do
   user "root"
   code "/usr/local/rvm/bin/rvm --default #{ruby_version}"
+  code "/usr/local/rvm/bin/rvm alias create default #{ruby_version}"
   not_if "/usr/local/rvm/bin/rvm list | grep '=> #{ruby_version}'"
   only_if { node[:rvm][:ruby][:default] }
 #  notifies :restart, "service[chef-client]"
@@ -34,6 +35,17 @@ gem_package "chef" do
   gem_binary "/usr/local/rvm/bin/rvm-gem.sh"
   only_if "test -e /usr/local/rvm/bin/rvm-gem.sh"
   # re-install the chef gem into rvm to enable subsequent chef-client run
+end
+
+gem_package "bundler" do
+  gem_binary "/usr/local/rvm/bin/rvm-gem.sh"
+  only_if "test -e /usr/local/rvm/bin/rvm-gem.sh"
+end
+
+group "rvm" do
+  action :modify
+  members "www-data"
+  append true
 end
 
 # Needed so that chef doesn't freak out if the chef-client service
