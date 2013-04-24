@@ -1,5 +1,9 @@
 <VirtualHost *:80>
         ServerName <%= @n["domain"] %>
+        <%- (@n["aliases"] || []).each do |al| -%>
+        <%= "ServerAlias #{al}" %>
+        <%- end -%>
+
         ServerAdmin giovanni@mikamai.com
 
         DocumentRoot <%= @docroot %>

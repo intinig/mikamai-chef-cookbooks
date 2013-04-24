@@ -18,8 +18,8 @@ link "/etc/apache2/sites-enabled/default-ssl" do
 end
 
 node.apache2.ssl_redirects.each do |h|
-  ipaddress = (node["cloud"] ? node["cloud"]["public_ipv4"] : node['ipaddress'])
-
+#  ipaddress = (node["cloud"] ? node["cloud"]["public_ipv4"] : node['ipaddress'])
+  ipaddress = node['ipaddress']
   template "/etc/apache2/sites-available/#{h["domain"]}_ssl" do
     source "ssl_redirect.erb"
     variables :ipaddress => ipaddress, :n => h
