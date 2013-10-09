@@ -22,12 +22,14 @@ end
 
 include_recipe "passenger::install"
 
-rvm_exec_prefix = system("test -e /usr/local/rvm") ? "/usr/local/rvm/bin/rvm default exec" : ""
-
-
 bash "install passenger/apache2" do
+
+  rvm_exec_prefix = Proc.new do
+    system("test -e /usr/local/rvm") ? "/usr/local/rvm/bin/rvm default exec" : ""
+  end
+
   user "root"
-  code "#{rvm_exec_prefix} passenger-install-apache2-module --auto"
+  code "#{rvm_exec_prefix.call} passenger-install-apache2-module --auto"
   creates "#{node[:passenger][:module_path]}"
 end
 

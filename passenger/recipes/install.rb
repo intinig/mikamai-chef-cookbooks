@@ -27,4 +27,4 @@ gem_package "bundler/rvm" do
 end
 
 node.default[:passenger][:root_path] = run_passenger_config '--root'
-node.default[:passenger][:module_path] = run_passenger_config('--root') + "/ext/apache2/mod_passenger.so"
+node.default[:passenger][:module_path] = run_passenger_config('--root') + "/buildout/apache2/mod_passenger.so"
