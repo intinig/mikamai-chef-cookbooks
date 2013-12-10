@@ -28,7 +28,7 @@ execute "apt-get upgrade -y" do
   environment "DEBIAN_FRONTEND"  => "noninteractive"
 end
 
-%w(intinig).each do |u|
+%w(intinig gawaine).each do |u|
   user u do
     action :create
     home "/home/#{u}"
@@ -100,17 +100,14 @@ cookbook_file "/var/apps/.ssh/authorized_keys" do
   mode 0640
 end
 
-cookbook_file "/var/apps/.ssh/known_hosts" do
-  action :create
-  source "github-known-hosts"
-  owner "deploy"
-  group "deploy"
-  mode 0640
-end
-
 execute 'ssh-keygen -t dsa -f /var/apps/.ssh/id_dsa -N ""' do
   user "deploy"
   creates "/var/apps/.ssh/id_dsa"
+end
+
+execute 'ssh-keyscan -H github.com > /var/apps/.ssh/known_hosts' do
+  user "deploy"
+  creates "/var/apps/.ssh/known_hosts"
 end
 
 package "git-core" do
