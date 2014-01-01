@@ -8,7 +8,7 @@ end
 action :create do
   raise "Cannot create a volume with a specific id (EC2 chooses volume ids)" if new_resource.volume_id
   if new_resource.snapshot_id =~ /vol/
-    new_resource.snapshot_id(find_snapshot_id(new_resource.snapshot_id))
+    new_resource.snapshot_id(find_snapshot_id(new_resource.snapshot_id, new_resource.most_recent_snapshot))
   end
 
   nvid = volume_id_in_node_data
@@ -35,7 +35,12 @@ action :create do
     else
       # If not, create volume and register its id in the node data
       converge_by("create a volume with id=#{new_resource.snapshot_id} size=#{new_resource.size} availability_zone=#{new_resource.availability_zone} and update the node data with created volume's id") do
-        nvid = create_volume(new_resource.snapshot_id, new_resource.size, new_resource.availability_zone, new_resource.timeout)
+      nvid = create_volume(new_resource.snapshot_id,
+                           new_resource.size,
+                           new_resource.availability_zone,
+                           new_resource.timeout,
+                           new_resource.volume_type,
+                           new_resource.piops)
         node.set['aws']['ebs_volume'][new_resource.name]['volume_id'] = nvid
         node.save unless Chef::Config[:solo]
       end
@@ -67,7 +72,6 @@ end
 
 action :detach do
   vol = determine_volume
-  return if vol[:aws_instance_id] != instance_id
   converge_by("detach volume with id: #{vol[:aws_id]}") do
     detach_volume(vol[:aws_id], new_resource.timeout)
   end
@@ -89,9 +93,9 @@ action :prune do
     if snapshot[:aws_volume_id] == vol[:aws_id]
       Chef::Log.info "Found old snapshot #{snapshot[:aws_id]} (#{snapshot[:aws_volume_id]}) #{snapshot[:aws_started_at]}"
       old_snapshots << snapshot
-    end 
+    end
   end
-  if old_snapshots.length > new_resource.snapshots_to_keep 
+  if old_snapshots.length > new_resource.snapshots_to_keep
     old_snapshots[new_resource.snapshots_to_keep, old_snapshots.length].each do |die|
       converge_by("delete snapshot with id: #{die[:aws_id]}") do
         Chef::Log.info "Deleting old snapshot #{die[:aws_id]}"
@@ -137,17 +141,35 @@ end
 # Returns true if the given volume meets the resource's attributes
 def volume_compatible_with_resource_definition?(volume)
   if new_resource.snapshot_id =~ /vol/
-    new_resource.snapshot_id(find_snapshot_id(new_resource.snapshot_id))
+    new_resource.snapshot_id(find_snapshot_id(new_resource.snapshot_id, new_resource.most_recent_snapshot))
   end
   (new_resource.size.nil? || new_resource.size == volume[:aws_size]) &&
   (new_resource.availability_zone.nil? || new_resource.availability_zone == volume[:zone]) &&
-  (new_resource.snapshot_id == volume[:snapshot_id])
+  (new_resource.snapshot_id.nil? || new_resource.snapshot_id == volume[:snapshot_id])
 end
 
 # Creates a volume according to specifications and blocks until done (or times out)
-def create_volume(snapshot_id, size, availability_zone, timeout)
+def create_volume(snapshot_id, size, availability_zone, timeout, volume_type, piops)
   availability_zone ||= instance_availability_zone
-  nv = ec2.create_volume(snapshot_id, size, availability_zone)
+
+  # Sanity checks so we don't shoot ourselves.
+  raise "Invalid volume type: #{volume_type}" unless ['standard', 'io1'].include?(volume_type)
+
+  # PIOPs requested. Must specify an iops param and probably won't be "low".
+  if volume_type == 'io1'
+    raise 'IOPS value not specified.' unless piops > 100
+  end
+
+  # Shouldn't see non-zero piops param without appropriate type.
+  if piops > 0
+    raise 'IOPS param without piops volume type.' unless volume_type == 'io1'
+  end
+
+  create_volume_opts = { :volume_type => volume_type }
+  # TODO: this may have to be casted to a string.  rightaws vs aws doc discrepancy.
+  create_volume_opts[:iops] = piops if volume_type == 'io1'
+
+  nv = ec2.create_volume(snapshot_id, size, availability_zone, create_volume_opts)
   Chef::Log.debug("Created new volume #{nv[:aws_id]}#{snapshot_id ? " based on #{snapshot_id}" : ""}")
 
   # block until created
@@ -209,8 +231,12 @@ end
 
 # Detaches the volume and blocks until done (or times out)
 def detach_volume(volume_id, timeout)
-  Chef::Log.debug("Detaching #{volume_id}")
   vol = volume_by_id(volume_id)
+  if vol[:aws_instance_id] != instance_id
+    Chef::Log.debug("EBS Volume #{volume_id} is not attached to this instance (attached to #{vol[:aws_instance_id]}). Skipping...")
+    return
+  end
+  Chef::Log.debug("Detaching #{volume_id}")
   orig_instance_id = vol[:aws_instance_id]
   ec2.detach_volume(volume_id)
 
@@ -237,3 +263,5 @@ def detach_volume(volume_id, timeout)
     raise "Timed out waiting for volume detachment after #{timeout} seconds"
   end
 end
+
+
