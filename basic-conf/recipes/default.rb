@@ -100,13 +100,6 @@ cookbook_file "/var/apps/.ssh/authorized_keys" do
   mode 0640
 end
 
-cookbook_file "/var/apps/.ssh/known_hosts" do
-  action :create
-  owner "deploy"
-  group "deploy"
-  mode 0640
-end
-
 execute 'ssh-keygen -t dsa -f /var/apps/.ssh/id_dsa -N ""' do
   user "deploy"
   creates "/var/apps/.ssh/id_dsa"
