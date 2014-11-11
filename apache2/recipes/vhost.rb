@@ -33,7 +33,7 @@ end
 (node.apache2.redirects + node.apache2.vhosts).each do |h|
   logrotate_app h["domain"] do
     cookbook "logrotate"
-    path "/var/apps/#{h["domain"]}*.log"
+    path "/var/apps/log/#{h["domain"]}*.log"
     frequency "weekly"
     rotate 52
     create "644 root adm"
